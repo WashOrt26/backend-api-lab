@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>WebSocket Chat Homelab</title>
+<style>
+body { font-family: system-ui; background:#0f172a; color:#e2e8f0; display:flex; flex-direction:column; height:100vh; margin:0; }
+#log { flex:1; overflow-y:auto; padding:1rem; background:#1e293b; }
+#input { display:flex; padding:1rem; background:#0f172a; }
+input { flex:1; padding:.6rem; border-radius:8px; border:none; }
+button { margin-left:.5rem; padding:.6rem 1rem; border:none; border-radius:8px; background:#3b82f6; color:white; }
+</style>
+</head>
+<body>
+<h2 style="padding:1rem">Chat WebSocket</h2>
+<div id="log"></div>
+<div id="input">
+<input id="name" placeholder="Tu nombre">
+<input id="msg" placeholder="Mensaje">
+<button onclick="send()">Enviar</button>
+</div>
+<script>
+const ws = new WebSocket(`ws://${location.host}`);
+const log = document.getElementById('log');
+ws.onmessage = e => {
+  const data = JSON.parse(e.data);
+  const p = document.createElement('div');
+  p.textContent = data.type==='system' ? `[SYS] ${data.message}` : `[${data.from}] ${data.text}`;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+};
+function send() {
+  const name = document.getElementById('name').value || 'anon';
+  const text = document.getElementById('msg').value;
+  ws.send(JSON.stringify({ from: name, text }));
+  document.getElementById('msg').value = '';
+}
+</script>
+</body>
+</html>
